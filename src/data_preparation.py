@@ -1,23 +1,29 @@
-from datasets import load_dataset
+from datasets import load_dataset, Dataset
+import pandas as pd
+from typing import Tuple
 
-def load_and_preprocess_data():
-    # Load the dataset
-    dataset = load_dataset("mteb/amazon_reviews_multi", trust_remote_code=True)
+def load_dataset_from_hub() -> Dataset:
+    try:
+        return load_dataset("mteb/amazon_reviews_multi", trust_remote_code=True)
+    except Exception as e:
+        raise RuntimeError(f"Failed to load dataset: {e}")
 
-    # Basic preprocessing
-    def preprocess_function(examples):
-        return {
-            'text': examples['review'],
-            'label': examples['stars'] - 1  # Assuming 1-5 star rating, convert to 0-4
-        }
+def preprocess_data(dataset: Dataset) -> Dataset:
+    columns_to_remove = [col for col in dataset['train'].column_names if col not in ['text', 'label']]
+    return dataset.map(lambda examples: examples, remove_columns=columns_to_remove)
 
-    preprocessed_dataset = dataset.map(preprocess_function, remove_columns=dataset['train'].column_names)
+def analyze_class_distribution(dataset: Dataset) -> None:
+    labels = pd.Series([example['label'] for example in dataset['train']])
+    class_dist = labels.value_counts()
+    imbalance_ratio = class_dist.max() / class_dist.min()
 
-    # Split the dataset
-    train_val = preprocessed_dataset['train'].train_test_split(test_size=0.1)
-    train_dataset = train_val['train']
-    val_dataset = train_val['test']
-    test_dataset = preprocessed_dataset['test']
+    print('Class distribution:', class_dist)
+    print('Imbalance ratio:', imbalance_ratio)
+
+def split_dataset(dataset: Dataset) -> Tuple[Dataset, Dataset, Dataset]:
+    train_dataset = dataset['train']
+    val_dataset = dataset['validation']
+    test_dataset = dataset['test']
 
     print(f"Train size: {len(train_dataset)}")
     print(f"Validation size: {len(val_dataset)}")
@@ -25,5 +31,11 @@ def load_and_preprocess_data():
 
     return train_dataset, val_dataset, test_dataset
 
+def load_and_preprocess_data() -> Tuple[Dataset, Dataset, Dataset]:
+    dataset = load_dataset_from_hub()
+    preprocessed_dataset = preprocess_data(dataset)
+    analyze_class_distribution(preprocessed_dataset)
+    return split_dataset(preprocessed_dataset)
+
 if __name__ == "__main__":
-    load_and_preprocess_data()
+    train_dataset, val_dataset, test_dataset = load_and_preprocess_data()
