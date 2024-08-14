@@ -1,8 +1,8 @@
 from transformers import TrainingArguments, Trainer
 from datasets import load_metric
 import numpy as np
-from data_preparation import load_and_preprocess_data
-from model import load_model_and_tokenizer, prepare_datasets, get_data_collator
+from src.data_preparation import load_and_preprocess_data
+from src.model import load_model_and_tokenizer, prepare_datasets, get_data_collator
 from typing import Dict, Tuple
 
 def compute_metrics(eval_pred: Tuple[np.ndarray, np.ndarray]) -> Dict[str, float]:

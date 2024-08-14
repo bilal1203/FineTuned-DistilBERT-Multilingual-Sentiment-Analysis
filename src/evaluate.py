@@ -61,7 +61,7 @@ def run_evaluation(trainer: Trainer, test_dataset: Dataset) -> None:
     print(f"Top influential words: {top_words}")
 
 if __name__ == "__main__":
-    from train import train_model
+    from src.train import train_model
     try:
         trainer, test_dataset = train_model()
         run_evaluation(trainer, test_dataset)
