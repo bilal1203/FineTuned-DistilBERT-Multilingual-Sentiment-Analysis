@@ -29,7 +29,6 @@ def get_training_args() -> TrainingArguments:
         warmup_steps=500,
         weight_decay=0.01,
         learning_rate=5e-5,
-        optimizer="AdamW",
         logging_dir='./logs',
         logging_steps=10,
         evaluation_strategy="epoch",
